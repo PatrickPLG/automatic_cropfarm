@@ -1,5 +1,3 @@
-//te
-
 #include <Adafruit_Sensor.h>
 
 #include <DHT.h>
@@ -34,16 +32,12 @@ LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
 DHT dht(A1,DHT11);
 
 
-int sensor = A0;
-int light = 12;
 int value;
 int temp = A1;
 #define SensorPin A0 
 float sensorValue = A0; 
 
 void setup() {
-  pinMode(22,INPUT);
-  pinMode(12,OUTPUT);
   Serial.begin(9600);
   dht.begin();
   lcd.begin(20,4);
