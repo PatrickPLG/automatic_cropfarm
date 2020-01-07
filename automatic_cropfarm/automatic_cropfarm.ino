@@ -12,13 +12,13 @@
 VSS = Højre på Potentiometer
 VDD = +
 V0 = Midte på Potentiometer
-RS = 7
+RS = 22
 RW = -
-E = 6
-D4 = 5
-D5 = 4
-D6 = 3
-D7 = 2
+E = 24
+D4 = 26
+D5 = 28
+D6 = 30
+D7 = 32
 A = +
 K = -
 
@@ -27,7 +27,7 @@ Venste = +
 
 */
 // Henter bibloteket LiquidCrystal som bruges til lcd skærmen og så hvilke pins ledninger sider i
-LiquidCrystal lcd(7, 6, 5, 4, 3, 2);
+LiquidCrystal lcd(20, 22, 24, 26, 28, 30);
 
 DHT dht(A1,DHT11);
 
