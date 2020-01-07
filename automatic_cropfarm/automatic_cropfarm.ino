@@ -6,6 +6,7 @@
 #include  <Wire.h> // include wire
 #include <LiquidCrystal.h>
 #include <Average.h>
+#include <IRremote.h>
 //Noter til opbygning
 //Skærm
 /*
@@ -35,11 +36,17 @@ DHT dht(A1,DHT11);
 int value;
 int temp = A1;
 #define SensorPin A0 
-float sensorValue = A0; 
+float sensorValue = A0;
+int RECV_PIN = 11; 
+
+IRrecv irrecv(RECV_PIN);
+decode_results results;
 
 void setup() {
   Serial.begin(9600);
+  irrecv.enableIRIn(); // Start the receiver
   pinMode(34,OUTPUT);
+  pinMode(11, INPUT);
   dht.begin();
   lcd.begin(20,4);
 }
@@ -47,15 +54,21 @@ void setup() {
 void loop() {
   value = digitalRead(A0);
   
-  if (value == LOW) {
-    digitalWrite(34,LOW);
+  if (value == HIGH) {
+    digitalWrite(34,HIGH);
     Serial.print("HØJ");
   }
   else
   {
-    digitalWrite(34,HIGH); //if soil moisture sensor provides HIGH value send HIGH value to relay
+    digitalWrite(34,LOW); //if soil moisture sensor provides HIGH value send HIGH value to relay
     Serial.print("LAV");
   }
+
+  if (irrecv.decode(&results))
+    {
+     Serial.println(results.value, HEX);
+     irrecv.resume(); // Receive the next value
+    }
   
   delay(400);
   float t = dht.readTemperature();
