@@ -39,24 +39,23 @@ float sensorValue = A0;
 
 void setup() {
   Serial.begin(9600);
+  pinMode(34,OUTPUT);
   dht.begin();
   lcd.begin(20,4);
 }
 
 void loop() {
-  /*
   value = digitalRead(A0);
   
   if (value == LOW) {
-    digitalWrite(12,HIGH);
+    digitalWrite(34,LOW);
     Serial.print("HØJ");
   }
   else
   {
-    digitalWrite(12,LOW); //if soil moisture sensor provides HIGH value send HIGH value to relay
+    digitalWrite(34,HIGH); //if soil moisture sensor provides HIGH value send HIGH value to relay
     Serial.print("LAV");
   }
-  */
   
   delay(400);
   float t = dht.readTemperature();
