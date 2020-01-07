@@ -27,7 +27,7 @@ Venste = +
 
 */
 // Henter bibloteket LiquidCrystal som bruges til lcd skærmen og så hvilke pins ledninger sider i
-LiquidCrystal lcd(20, 22, 24, 26, 28, 30);
+LiquidCrystal lcd(22, 24, 26, 28, 30, 32);
 
 DHT dht(A1,DHT11);
 
