@@ -53,22 +53,28 @@ void setup() {
 
 void loop() {
   value = digitalRead(A0);
-  
-  if (value == HIGH) {
-    digitalWrite(34,HIGH);
-    Serial.print("HØJ");
-  }
-  else
-  {
-    digitalWrite(34,LOW); //if soil moisture sensor provides HIGH value send HIGH value to relay
-    Serial.print("LAV");
-  }
-
   if (irrecv.decode(&results))
     {
      Serial.println(results.value, HEX);
      irrecv.resume(); // Receive the next value
     }
+ 
+  if (results.value == 0XFF30CF) {
+    //
+  }
+  if (results.value == 0XFF18E7) {
+    //
+  }
+
+  if (value == HIGH) {
+    digitalWrite(34,HIGH);
+    Serial.print("HØJ");
+  }
+  if (value == LOW)
+  {
+    digitalWrite(34,LOW); //if soil moisture sensor provides HIGH value send HIGH value to relay
+    Serial.print("LAV");
+  }
   
   delay(400);
   float t = dht.readTemperature();
