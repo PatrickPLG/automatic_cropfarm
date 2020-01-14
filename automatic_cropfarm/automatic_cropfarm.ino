@@ -7,8 +7,10 @@
 #include <LiquidCrystal.h>
 #include <Average.h>
 #include <IRremote.h>
-//Noter til opbygning
-//Skærm
+
+
+// Noter til opbygning
+// Skærm
 /*
 VSS = Højre på Potentiometer
 VDD = +
@@ -30,6 +32,7 @@ Venste = +
 // Henter bibloteket LiquidCrystal som bruges til lcd skærmen og så hvilke pins ledninger sider i
 LiquidCrystal lcd(22, 24, 26, 28, 30, 32);
 
+//Temeperatur sensor
 DHT dht(A1,DHT11);
 
 
@@ -52,42 +55,57 @@ void setup() {
 }
 
 void loop() {
+
+  // Jord-fugtigheds sensor
   value = digitalRead(A0);
+
+  // Fjernbetjening styring
   if (irrecv.decode(&results))
     {
      Serial.println(results.value, HEX);
      irrecv.resume(); // Receive the next value
     }
  
-  if (results.value == 0XFF30CF) {
+  if (results.value == 0XFF30CF //1) {
     //
   }
-  if (results.value == 0XFF18E7) {
+  if (results.value == 0XFF18E7 //2) {
     //
   }
 
+  // Hvis jord-fugtigheds sensoren er high
   if (value == HIGH) {
+    // Transistoren sættes til high = pumpen kører
     digitalWrite(34,HIGH);
     Serial.print("HØJ");
   }
+
+  // Hvis jord-fugtigheds sensoren er low
   if (value == LOW)
   {
-    digitalWrite(34,LOW); //if soil moisture sensor provides HIGH value send HIGH value to relay
+    // Transistoren sættes til low = intet vand i pumpen
+    digitalWrite(34,LOW);
     Serial.print("LAV");
   }
   
+  // Delay som opdatere skærmen
   delay(400);
+
+  // Læser temperaturen i celsius
   float t = dht.readTemperature();
-  // Read temperature as Fahrenheit (isFahrenheit = true)
+  // læser temeperaturen i Fahrenheit
   float f = dht.readTemperature(true);
 
-  // Check if any reads failed and exit early (to try again).
+  // Tjekker om der er fejl med temeperatur sensoren
   if (isnan(t) || isnan(f)) {
     Serial.println("Failed to read from DHT sensor!");
     return;
   }
+
+  // Kører 100 målinger
   for (int i = 0; i <= 100; i++) 
  { 
+   // 
    sensorValue = sensorValue + analogRead(SensorPin); 
    delay(1); 
  } 
@@ -95,20 +113,32 @@ void loop() {
  Serial.println(sensorValue); 
  delay(30); 
   
+  // Console output
+
+  // Temeperatur i celsius og i Fahrenheit
   Serial.print("Temperature: ");
   Serial.print(t);
   Serial.print(" *C ");
   Serial.print(f);
   Serial.print(" *F\t");
+
+  // Lcd skærm output
+
+  // Sætter cursoren i 0,1
   lcd.setCursor(0,1); 
+  // Printer temperaturen i celsius og Fahrenheit
   lcd.print("Temp: ");
   lcd.print(t);
   lcd.print((char)223);
   lcd.print("C ");
   lcd.print(f);
   lcd.print("F");
+
+  // Sætter cursoren i 0,2
   lcd.setCursor(0,2);
-  lcd.print("Humidity: ");
+
+  // Printer Jord fugtigheden
+  lcd.print("Fugtighed: ");
   lcd.print(sensorValue);
   lcd.print("");
 }
