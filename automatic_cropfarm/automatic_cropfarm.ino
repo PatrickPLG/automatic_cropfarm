@@ -6,7 +6,6 @@
 #include  <Wire.h> // include wire
 #include <LiquidCrystal.h>
 #include <Average.h>
-#include <IRremote.h>
 
 
 // Noter til opbygning
@@ -30,7 +29,7 @@ Venste = +
 
 */
 // Henter bibloteket LiquidCrystal som bruges til lcd skærmen og så hvilke pins ledninger sider i
-LiquidCrystal lcd(22, 24, 26, 28, 30, 32);
+LiquidCrystal lcd(32, 30, 28, 26, 24, 22);
 
 //Temeperatur sensor
 DHT dht(A1,DHT11);
@@ -40,44 +39,39 @@ int value;
 int temp = A1;
 #define SensorPin A0 
 float sensorValue = A0;
-int RECV_PIN = 11; 
 
-IRrecv irrecv(RECV_PIN);
-decode_results results;
+int state = 0;
+
 
 void setup() {
-  Serial.begin(9600);
-  irrecv.enableIRIn(); // Start the receiver
+  Serial.begin(38400);
   pinMode(34,OUTPUT);
-  pinMode(11, INPUT);
   dht.begin();
   lcd.begin(20,4);
 }
 
 void loop() {
 
+  if (Serial.available() > 0) {
+    state = Serial.read();
+  }
   // Jord-fugtigheds sensor
   value = digitalRead(A0);
 
-  // Fjernbetjening styring
-  if (irrecv.decode(&results))
-    {
-     Serial.println(results.value, HEX);
-     irrecv.resume(); // Receive the next value
-    }
  
-  if (results.value == 0XFF30CF //1) {
-    //
+  if (state == "0") {
+    Serial.println("Sut den");
+    state = 0;
   }
-  if (results.value == 0XFF18E7 //2) {
-    //
+
+  else if (state == "1") {
+    Serial.println("hejsa");
   }
 
   // Hvis jord-fugtigheds sensoren er high
   if (value == HIGH) {
     // Transistoren sættes til high = pumpen kører
     digitalWrite(34,HIGH);
-    Serial.print("HØJ");
   }
 
   // Hvis jord-fugtigheds sensoren er low
@@ -85,7 +79,6 @@ void loop() {
   {
     // Transistoren sættes til low = intet vand i pumpen
     digitalWrite(34,LOW);
-    Serial.print("LAV");
   }
   
   // Delay som opdatere skærmen
@@ -98,7 +91,7 @@ void loop() {
 
   // Tjekker om der er fejl med temeperatur sensoren
   if (isnan(t) || isnan(f)) {
-    Serial.println("Failed to read from DHT sensor!");
+    //Serial.println("Failed to read from DHT sensor!");
     return;
   }
 
@@ -110,18 +103,18 @@ void loop() {
    delay(1); 
  } 
  sensorValue = sensorValue/100.0; 
- Serial.println(sensorValue); 
+ //Serial.println(sensorValue); 
  delay(30); 
   
   // Console output
 
-  // Temeperatur i celsius og i Fahrenheit
+ /* // Temeperatur i celsius og i Fahrenheit
   Serial.print("Temperature: ");
   Serial.print(t);
   Serial.print(" *C ");
   Serial.print(f);
   Serial.print(" *F\t");
-
+*/
   // Lcd skærm output
 
   // Sætter cursoren i 0,1
