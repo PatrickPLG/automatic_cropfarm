@@ -6,20 +6,21 @@
 #include  <Wire.h> // include wire
 #include <LiquidCrystal.h>
 #include <Average.h>
-#include <IRremote.h>
-//Noter til opbygning
-//Skærm
+
+
+// Noter til opbygning
+// Skærm
 /*
 VSS = Højre på Potentiometer
 VDD = +
 V0 = Midte på Potentiometer
-RS = 22
+RS = 32
 RW = -
-E = 24
-D4 = 26
-D5 = 28
-D6 = 30
-D7 = 32
+E = 30
+D4 =28
+D5 = 26
+D6 = 24
+D7 = 22
 A = +
 K = -
 
@@ -28,8 +29,9 @@ Venste = +
 
 */
 // Henter bibloteket LiquidCrystal som bruges til lcd skærmen og så hvilke pins ledninger sider i
-LiquidCrystal lcd(22, 24, 26, 28, 30, 32);
+LiquidCrystal lcd(32, 30, 28, 26, 24, 22);
 
+//Temeperatur sensor
 DHT dht(A1,DHT11);
 
 
@@ -37,78 +39,237 @@ int value;
 int temp = A1;
 #define SensorPin A0 
 float sensorValue = A0;
-int RECV_PIN = 11; 
 
-IRrecv irrecv(RECV_PIN);
-decode_results results;
+int sekDelay = 5;
+
+int menu = 1;
+
+void updateMenu();
+
+char state = 0;
+
+int check = 0;
+
+boolean updateMenuRUN = false;
 
 void setup() {
   Serial.begin(9600);
-  irrecv.enableIRIn(); // Start the receiver
   pinMode(34,OUTPUT);
-  pinMode(11, INPUT);
   dht.begin();
   lcd.begin(20,4);
+  //updateMenu();
 }
 
 void loop() {
-  value = digitalRead(A0);
-  if (irrecv.decode(&results))
-    {
-     Serial.println(results.value, HEX);
-     irrecv.resume(); // Receive the next value
+/*
+  if (Serial.available() > 0) {
+      state = Serial.read();
+      if (state == 'a') {
+        //digitalWrite(13, HIGH);
+        Serial.print("Down");
+        menu++;
+        updateMenu();
+        delay(100);
+        //while (results.value == 0XFF30CF);
+      }
+      if (state == 'b') {
+        //digitalWrite(13, HIGH);
+        Serial.print("Up");
+        menu--;
+        updateMenu();
+        delay(100);
+        //while (results.value == 0XFF30CF);
+      }
+      if (state == '0') {
+        Serial.print("Select");
+        executeAction();
+        updateMenu();
+        delay(100);
+        //while (results.value == 0XFF629D);
     }
- 
-  if (results.value == 0XFF30CF) {
-    //
   }
-  if (results.value == 0XFF18E7) {
-    //
+*/
+
+
+  while (check == 0) {
+    // Jord-fugtigheds sensor
+  value = digitalRead(A0);
+
+  // Hvis jord-fugtigheds sensoren er high
+  if (value == HIGH) {
+    // Transistoren sættes til high = pumpen kører
+    digitalWrite(34,HIGH);
+    delay(sekDelay);
+    digitalWrite(34,LOW);
   }
 
-  if (value == HIGH) {
-    digitalWrite(34,HIGH);
-    Serial.print("HØJ");
-  }
+  // Hvis jord-fugtigheds sensoren er low
   if (value == LOW)
   {
-    digitalWrite(34,LOW); //if soil moisture sensor provides HIGH value send HIGH value to relay
-    Serial.print("LAV");
+    // Transistoren sættes til low = intet vand i pumpen
+    digitalWrite(34,LOW);
   }
   
+  // Delay som opdatere skærmen
   delay(400);
+
+  // Læser temperaturen i celsius
   float t = dht.readTemperature();
-  // Read temperature as Fahrenheit (isFahrenheit = true)
+  // læser temeperaturen i Fahrenheit
   float f = dht.readTemperature(true);
 
-  // Check if any reads failed and exit early (to try again).
+  // Tjekker om der er fejl med temeperatur sensoren
   if (isnan(t) || isnan(f)) {
-    Serial.println("Failed to read from DHT sensor!");
+    //Serial.println("Failed to read from DHT sensor!");
     return;
   }
+
+  // Kører 100 målinger
   for (int i = 0; i <= 100; i++) 
  { 
+   // 
    sensorValue = sensorValue + analogRead(SensorPin); 
    delay(1); 
  } 
- sensorValue = sensorValue/100.0; 
- Serial.println(sensorValue); 
- delay(30); 
+  sensorValue = sensorValue/100.0; 
+  //Serial.println(sensorValue); 
+  delay(30); 
   
-  Serial.print("Temperature: ");
-  Serial.print(t);
-  Serial.print(" *C ");
-  Serial.print(f);
-  Serial.print(" *F\t");
+
+  // Sætter cursoren i 0,1
   lcd.setCursor(0,1); 
+  // Printer temperaturen i celsius og Fahrenheit
   lcd.print("Temp: ");
   lcd.print(t);
   lcd.print((char)223);
   lcd.print("C ");
   lcd.print(f);
   lcd.print("F");
+
+  // Sætter cursoren i 0,2
   lcd.setCursor(0,2);
-  lcd.print("Humidity: ");
+
+  // Printer Jord fugtigheden
+  lcd.print("Fugtighed: ");
   lcd.print(sensorValue);
   lcd.print("");
+
+  if (Serial.available() > 0) {
+      state = Serial.read();
+      if (state == '1'){
+        check++;
+        lcd.clear();
+        settings();
+      }
+  }
+  }
+}
+
+void settings() {
+  if (updateMenuRUN == false) {
+    updateMenu();
+    Serial.print("Settings");
+    updateMenuRUN = true;
+  }
+  
+  if (Serial.available() > 0) {
+      state = Serial.read();
+      if (state == 'a') {
+        //digitalWrite(13, HIGH);
+        Serial.print("Down");
+        menu++;
+        updateMenu();
+        delay(100);
+        //while (results.value == 0XFF30CF);
+      }
+      if (state == 'b') {
+        //digitalWrite(13, HIGH);
+        Serial.print("Up");
+        menu--;
+        updateMenu();
+        delay(100);
+        //while (results.value == 0XFF30CF);
+      }
+      if (state == '0') {
+        Serial.print("Select");
+        executeAction();
+        updateMenu();
+        delay(100);
+        //while (results.value == 0XFF629D);
+    }
+  }
+}
+
+
+void updateMenu() {
+  switch (menu) {
+    case 0:
+      menu = 1;
+      break;
+    case 1:
+      lcd.clear();
+      lcd.print(">MenuItem1");
+      lcd.setCursor(0, 1);
+      lcd.print(" MenuItem2");
+      break;
+    case 2:
+      lcd.clear();
+      lcd.print(" MenuItem1");
+      lcd.setCursor(0, 1);
+      lcd.print(">MenuItem2");
+      break;
+    case 3:
+      lcd.clear();
+      lcd.print(">MenuItem3");
+      lcd.setCursor(0, 1);
+      lcd.print(" MenuItem4");
+      break;
+    case 4:
+      lcd.clear();
+      lcd.print(" MenuItem3");
+      lcd.setCursor(0, 1);
+      lcd.print(">MenuItem4");
+      break;
+    case 5:
+      menu = 4;
+      break;
+  }
+}
+
+void executeAction() {
+  switch (menu) {
+    case 1:
+      action1();
+      break;
+    case 2:
+      action2();
+      break;
+    case 3:
+      action3();
+      break;
+    case 4:
+      action4();
+      break;
+  }
+}
+
+void action1() {
+  lcd.clear();
+  lcd.print(">Executing #1");
+  delay(1500);
+}
+void action2() {
+  lcd.clear();
+  lcd.print(">Executing #2");
+  delay(1500);
+}
+void action3() {
+  lcd.clear();
+  lcd.print(">Executing #3");
+  delay(1500);
+}
+void action4() {
+  lcd.clear();
+  lcd.print(">Executing #4");
+  delay(1500);
 }
