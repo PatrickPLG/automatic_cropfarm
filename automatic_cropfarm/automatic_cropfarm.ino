@@ -14,13 +14,13 @@
 VSS = Højre på Potentiometer
 VDD = +
 V0 = Midte på Potentiometer
-RS = 22
+RS = 32
 RW = -
-E = 24
-D4 = 26
-D5 = 28
-D6 = 30
-D7 = 32
+E = 30
+D4 =28
+D5 = 26
+D6 = 24
+D7 = 22
 A = +
 K = -
 
@@ -40,38 +40,67 @@ int temp = A1;
 #define SensorPin A0 
 float sensorValue = A0;
 
-int state = 0;
+int sekDelay = 5;
 
+int menu = 1;
+
+void updateMenu();
+
+char state = 0;
+
+int check = 0;
+
+boolean updateMenuRUN = false;
 
 void setup() {
-  Serial.begin(38400);
+  Serial.begin(9600);
   pinMode(34,OUTPUT);
   dht.begin();
   lcd.begin(20,4);
+  //updateMenu();
 }
 
 void loop() {
-
+/*
   if (Serial.available() > 0) {
-    state = Serial.read();
+      state = Serial.read();
+      if (state == 'a') {
+        //digitalWrite(13, HIGH);
+        Serial.print("Down");
+        menu++;
+        updateMenu();
+        delay(100);
+        //while (results.value == 0XFF30CF);
+      }
+      if (state == 'b') {
+        //digitalWrite(13, HIGH);
+        Serial.print("Up");
+        menu--;
+        updateMenu();
+        delay(100);
+        //while (results.value == 0XFF30CF);
+      }
+      if (state == '0') {
+        Serial.print("Select");
+        executeAction();
+        updateMenu();
+        delay(100);
+        //while (results.value == 0XFF629D);
+    }
   }
-  // Jord-fugtigheds sensor
+*/
+
+
+  while (check == 0) {
+    // Jord-fugtigheds sensor
   value = digitalRead(A0);
-
- 
-  if (state == "0") {
-    Serial.println("Sut den");
-    state = 0;
-  }
-
-  else if (state == "1") {
-    Serial.println("hejsa");
-  }
 
   // Hvis jord-fugtigheds sensoren er high
   if (value == HIGH) {
     // Transistoren sættes til high = pumpen kører
     digitalWrite(34,HIGH);
+    delay(sekDelay);
+    digitalWrite(34,LOW);
   }
 
   // Hvis jord-fugtigheds sensoren er low
@@ -102,20 +131,10 @@ void loop() {
    sensorValue = sensorValue + analogRead(SensorPin); 
    delay(1); 
  } 
- sensorValue = sensorValue/100.0; 
- //Serial.println(sensorValue); 
- delay(30); 
+  sensorValue = sensorValue/100.0; 
+  //Serial.println(sensorValue); 
+  delay(30); 
   
-  // Console output
-
- /* // Temeperatur i celsius og i Fahrenheit
-  Serial.print("Temperature: ");
-  Serial.print(t);
-  Serial.print(" *C ");
-  Serial.print(f);
-  Serial.print(" *F\t");
-*/
-  // Lcd skærm output
 
   // Sætter cursoren i 0,1
   lcd.setCursor(0,1); 
@@ -134,4 +153,123 @@ void loop() {
   lcd.print("Fugtighed: ");
   lcd.print(sensorValue);
   lcd.print("");
+
+  if (Serial.available() > 0) {
+      state = Serial.read();
+      if (state == '1'){
+        check++;
+        lcd.clear();
+        settings();
+      }
+  }
+  }
+}
+
+void settings() {
+  if (updateMenuRUN == false) {
+    updateMenu();
+    Serial.print("Settings");
+    updateMenuRUN = true;
+  }
+  
+  if (Serial.available() > 0) {
+      state = Serial.read();
+      if (state == 'a') {
+        //digitalWrite(13, HIGH);
+        Serial.print("Down");
+        menu++;
+        updateMenu();
+        delay(100);
+        //while (results.value == 0XFF30CF);
+      }
+      if (state == 'b') {
+        //digitalWrite(13, HIGH);
+        Serial.print("Up");
+        menu--;
+        updateMenu();
+        delay(100);
+        //while (results.value == 0XFF30CF);
+      }
+      if (state == '0') {
+        Serial.print("Select");
+        executeAction();
+        updateMenu();
+        delay(100);
+        //while (results.value == 0XFF629D);
+    }
+  }
+}
+
+
+void updateMenu() {
+  switch (menu) {
+    case 0:
+      menu = 1;
+      break;
+    case 1:
+      lcd.clear();
+      lcd.print(">MenuItem1");
+      lcd.setCursor(0, 1);
+      lcd.print(" MenuItem2");
+      break;
+    case 2:
+      lcd.clear();
+      lcd.print(" MenuItem1");
+      lcd.setCursor(0, 1);
+      lcd.print(">MenuItem2");
+      break;
+    case 3:
+      lcd.clear();
+      lcd.print(">MenuItem3");
+      lcd.setCursor(0, 1);
+      lcd.print(" MenuItem4");
+      break;
+    case 4:
+      lcd.clear();
+      lcd.print(" MenuItem3");
+      lcd.setCursor(0, 1);
+      lcd.print(">MenuItem4");
+      break;
+    case 5:
+      menu = 4;
+      break;
+  }
+}
+
+void executeAction() {
+  switch (menu) {
+    case 1:
+      action1();
+      break;
+    case 2:
+      action2();
+      break;
+    case 3:
+      action3();
+      break;
+    case 4:
+      action4();
+      break;
+  }
+}
+
+void action1() {
+  lcd.clear();
+  lcd.print(">Executing #1");
+  delay(1500);
+}
+void action2() {
+  lcd.clear();
+  lcd.print(">Executing #2");
+  delay(1500);
+}
+void action3() {
+  lcd.clear();
+  lcd.print(">Executing #3");
+  delay(1500);
+}
+void action4() {
+  lcd.clear();
+  lcd.print(">Executing #4");
+  delay(1500);
 }
