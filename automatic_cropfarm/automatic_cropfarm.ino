@@ -160,7 +160,7 @@ void loop() {
   }
   if (Serial.available() > 0) {
       state = Serial.read();
-      if (state == '1'){
+      if (state == '2'){
         he = false;
         check = true;
         lcd.clear();
@@ -274,7 +274,9 @@ void action3() {
   lcd.setCursor(0,1);
   lcd.print("Sekunder: ");
   lcd.print(sekDelay);
-  delay(1500);
+  if (state == '1'){
+    lcd.clear();
+  }
 }
 void action4() {
   lcd.clear();
