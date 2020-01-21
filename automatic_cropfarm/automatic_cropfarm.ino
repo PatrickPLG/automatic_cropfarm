@@ -48,9 +48,13 @@ void updateMenu();
 
 char state = 0;
 
-int check = 0;
+char state2 = 0;
+
+boolean check = false;
 
 boolean updateMenuRUN = false;
+
+boolean he = false;
 
 void setup() {
   Serial.begin(9600);
@@ -89,9 +93,7 @@ void loop() {
     }
   }
 */
-
-
-  while (check == 0) {
+  if (check == false) {
     // Jord-fugtigheds sensor
   value = digitalRead(A0);
 
@@ -154,85 +156,89 @@ void loop() {
   lcd.print(sensorValue);
   lcd.print("");
 
+  
+  }
   if (Serial.available() > 0) {
       state = Serial.read();
       if (state == '1'){
-        check++;
+        he = false;
+        check = true;
         lcd.clear();
-        settings();
+        while (he == false) {
+          settings();
+        }
       }
-  }
   }
 }
 
 void settings() {
   if (updateMenuRUN == false) {
     updateMenu();
-    Serial.print("Settings");
     updateMenuRUN = true;
   }
-  
   if (Serial.available() > 0) {
-      state = Serial.read();
-      if (state == 'a') {
-        //digitalWrite(13, HIGH);
-        Serial.print("Down");
-        menu++;
-        updateMenu();
-        delay(100);
-        //while (results.value == 0XFF30CF);
-      }
-      if (state == 'b') {
-        //digitalWrite(13, HIGH);
-        Serial.print("Up");
-        menu--;
-        updateMenu();
-        delay(100);
-        //while (results.value == 0XFF30CF);
-      }
-      if (state == '0') {
-        Serial.print("Select");
-        executeAction();
-        updateMenu();
-        delay(100);
-        //while (results.value == 0XFF629D);
+  state = Serial.read();
+    if (state == 'a') {
+      //digitalWrite(13, HIGH);
+      Serial.println("Down");
+      menu++;
+      updateMenu();
+      delay(100);
+      //while (results.value == 0XFF30CF);
     }
+    if (state == 'b') {
+      //digitalWrite(13, HIGH);
+      Serial.println("Up");
+      menu--;
+      updateMenu();
+      delay(100);
+      //while (results.value == 0XFF30CF);
+    }
+    if (state == '0') {
+      Serial.println("Select");
+      executeAction();
+      updateMenu();
+      delay(100);
+      //while (results.value == 0XFF629D);
+      }
   }
-}
+} 
 
 
 void updateMenu() {
-  switch (menu) {
+  if (he == false) {
+    switch (menu) {
     case 0:
       menu = 1;
       break;
     case 1:
       lcd.clear();
-      lcd.print(">MenuItem1");
+      lcd.print(">Temperatur");
       lcd.setCursor(0, 1);
-      lcd.print(" MenuItem2");
+      lcd.print(" Sensor");
       break;
     case 2:
       lcd.clear();
-      lcd.print(" MenuItem1");
+      lcd.print(" Temperatur");
       lcd.setCursor(0, 1);
-      lcd.print(">MenuItem2");
+      lcd.print(">Sensor");
       break;
     case 3:
       lcd.clear();
-      lcd.print(">MenuItem3");
+      lcd.print(">Watercycle");
       lcd.setCursor(0, 1);
-      lcd.print(" MenuItem4");
+      lcd.print(" Quit");
       break;
     case 4:
       lcd.clear();
-      lcd.print(" MenuItem3");
+      lcd.print(" Watercycle");
       lcd.setCursor(0, 1);
-      lcd.print(">MenuItem4");
+      lcd.print(">Quit");
       break;
     case 5:
       menu = 4;
       break;
+  }
   }
 }
 
@@ -265,11 +271,16 @@ void action2() {
 }
 void action3() {
   lcd.clear();
-  lcd.print(">Executing #3");
+  lcd.setCursor(0,1);
+  lcd.print("Sekunder: ");
+  lcd.print(sekDelay);
   delay(1500);
 }
 void action4() {
   lcd.clear();
-  lcd.print(">Executing #4");
+  lcd.print(">Quitting");
   delay(1500);
+  lcd.clear();
+  he = true;
+  check = false;
 }
