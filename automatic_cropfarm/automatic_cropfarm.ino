@@ -252,7 +252,7 @@ void executeAction() {
       break;
     case 3:
       action3();
-      break;
+      //break;
     case 4:
       action4();
       break;
@@ -274,8 +274,11 @@ void action3() {
   lcd.setCursor(0,1);
   lcd.print("Sekunder: ");
   lcd.print(sekDelay);
-  if (state == '1'){
-    lcd.clear();
+  if (Serial.available() > 0) {
+    if (state == '1'){
+      lcd.clear();
+      settings();
+    }
   }
 }
 void action4() {
