@@ -251,7 +251,7 @@ void executeAction() {
       action2();
       break;
     case 3:
-      action3();
+      action3(); //Måske while løkke med state = 1
       //break;
     case 4:
       action4();
