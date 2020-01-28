@@ -109,7 +109,7 @@ void loop() {
   value = digitalRead(A0);
 
   // Hvis jord-fugtigheds sensoren er high
-  if (value == HIGH) {
+  if (value < humTarget) {
     // Transistoren sættes til high = pumpen kører
     digitalWrite(34,HIGH);
     delay(waterTarget);
@@ -117,7 +117,7 @@ void loop() {
   }
 
   // Hvis jord-fugtigheds sensoren er low
-  if (value == LOW)
+  if (value > humTarget)
   {
     // Transistoren sættes til low = intet vand i pumpen
     digitalWrite(34,LOW);
