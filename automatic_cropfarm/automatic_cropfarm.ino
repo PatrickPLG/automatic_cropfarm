@@ -35,12 +35,23 @@ LiquidCrystal lcd(32, 30, 28, 26, 24, 22);
 DHT dht(A1,DHT11);
 
 
+// Target skærm
+int tempTarget = 25;
+int humTarget = 700;
+int waterTarget = 7;
+
+//------------------
+
+// Actual skærm
+int sekDelay = 5;
+int humActual = 500;
+
+//------------------
+
 int value;
 int temp = A1;
 #define SensorPin A0 
 float sensorValue = A0;
-
-int sekDelay = 5;
 
 int menu = 1;
 
@@ -101,7 +112,7 @@ void loop() {
   if (value == HIGH) {
     // Transistoren sættes til high = pumpen kører
     digitalWrite(34,HIGH);
-    delay(sekDelay);
+    delay(waterTarget);
     digitalWrite(34,LOW);
   }
 
@@ -195,8 +206,15 @@ void settings() {
       //while (results.value == 0XFF30CF);
     }
     if (state == '0') {
-      Serial.println("Select");
+      Serial.println("+");
       executeAction();
+      updateMenu();
+      delay(100);
+      //while (results.value == 0XFF629D);
+      }
+    if (state == '1') {
+      Serial.println("-");
+      executeAction2();
       updateMenu();
       delay(100);
       //while (results.value == 0XFF629D);
@@ -213,26 +231,78 @@ void updateMenu() {
       break;
     case 1:
       lcd.clear();
-      lcd.print(">Temperatur");
+      lcd.print(">Temp: ");
+      lcd.print(dht.readTemperature());
+      lcd.print(" ");
+      lcd.print(tempTarget);
       lcd.setCursor(0, 1);
-      lcd.print(" Sensor");
+      lcd.print(" Humit: ");
+      lcd.print(sensorValue);
+      lcd.print(" ");
+      lcd.print(humTarget);
+      lcd.setCursor(0, 2);
+      lcd.print(" WaterC: ");
+      lcd.print(sekDelay);
+      lcd.print(" ");
+      lcd.print(waterTarget);
+      lcd.setCursor(0, 3);
+      lcd.print(" Quit");
       break;
     case 2:
       lcd.clear();
-      lcd.print(" Temperatur");
+      lcd.print(" Temp: ");
+      lcd.print(dht.readTemperature());
+      lcd.print(" ");
+      lcd.print(tempTarget);
       lcd.setCursor(0, 1);
-      lcd.print(">Sensor");
+      lcd.print(">Humit: ");
+      lcd.print(sensorValue);
+      lcd.print(" ");
+      lcd.print(humTarget);
+      lcd.setCursor(0, 2);
+      lcd.print(" WaterC: ");
+      lcd.print(sekDelay);
+      lcd.print(" ");
+      lcd.print(waterTarget);
+      lcd.setCursor(0, 3);
+      lcd.print(" Quit ");
       break;
     case 3:
       lcd.clear();
-      lcd.print(">Watercycle");
+      lcd.print(" Temp: ");
+      lcd.print(dht.readTemperature());
+      lcd.print(" ");
+      lcd.print(tempTarget);
       lcd.setCursor(0, 1);
-      lcd.print(" Quit");
+      lcd.print(" Humit: ");
+      lcd.print(sensorValue);
+      lcd.print(" ");
+      lcd.print(humTarget);
+      lcd.setCursor(0, 2);
+      lcd.print(">WaterC: ");
+      lcd.print(sekDelay);
+      lcd.print(" ");
+      lcd.print(waterTarget);
+      lcd.setCursor(0, 3);
+      lcd.print(" Quit ");
       break;
     case 4:
       lcd.clear();
-      lcd.print(" Watercycle");
+      lcd.print(" Temp: ");
+      lcd.print(dht.readTemperature());
+      lcd.print(" ");
+      lcd.print(tempTarget);
       lcd.setCursor(0, 1);
+      lcd.print(" Humit: ");
+      lcd.print(sensorValue);
+      lcd.print(" ");
+      lcd.print(humTarget);
+      lcd.setCursor(0, 2);
+      lcd.print(" WaterC: ");
+      lcd.print(sekDelay);
+      lcd.print(" ");
+      lcd.print(waterTarget);
+      lcd.setCursor(0, 3);
       lcd.print(">Quit");
       break;
     case 5:
@@ -252,7 +322,7 @@ void executeAction() {
       break;
     case 3:
       action3(); //Måske while løkke med state = 1
-      //break;
+      break;
     case 4:
       action4();
       break;
@@ -260,26 +330,13 @@ void executeAction() {
 }
 
 void action1() {
-  lcd.clear();
-  lcd.print(">Executing #1");
-  delay(1500);
+  tempTarget++;
 }
 void action2() {
-  lcd.clear();
-  lcd.print(">Executing #2");
-  delay(1500);
+  humTarget++;
 }
 void action3() {
-  lcd.clear();
-  lcd.setCursor(0,1);
-  lcd.print("Sekunder: ");
-  lcd.print(sekDelay);
-  if (Serial.available() > 0) {
-    if (state == '1'){
-      lcd.clear();
-      settings();
-    }
-  }
+  waterTarget++;
 }
 void action4() {
   lcd.clear();
@@ -288,4 +345,41 @@ void action4() {
   lcd.clear();
   he = true;
   check = false;
+  sekDelay = waterTarget;
+}
+
+void executeAction2() {
+  switch (menu) {
+    case 1:
+      action5();
+      break;
+    case 2:
+      action6();
+      break;
+    case 3:
+      action7(); //Måske while løkke med state = 1
+      break;
+    case 4:
+      action8();
+      break;
+  }
+}
+
+void action5() {
+  tempTarget--;
+}
+void action6() {
+  humTarget--;
+}
+void action7() {
+  waterTarget--;
+}
+void action8() {
+  lcd.clear();
+  lcd.print(">Quitting");
+  delay(1500);
+  lcd.clear();
+  he = true;
+  check = false;
+  sekDelay = waterTarget;
 }
